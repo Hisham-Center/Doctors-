@@ -1,0 +1,8 @@
+1) أنشئ Repository جديد على GitHub.
+2) ارفع كل محتويات هذا المجلد كما هي.
+3) Settings → Pages → Deploy from a branch.
+4) Branch = main ، Folder = /(root).
+5) Save.
+6) افتح رابط الموقع الذي يعطيه GitHub.
+
+مهم: لا تغيّر اسم index.html.
