@@ -1,2 +1,0 @@
-ارفع محتويات هذا المجلد إلى Repository على GitHub، ثم Settings → Pages → Deploy from a branch → main → /(root) → Save.
-لا تغيّر اسم index.html.
