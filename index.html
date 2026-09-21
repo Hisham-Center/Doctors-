@@ -1758,7 +1758,7 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
 (function(){
   'use strict';
   var API='https://script.google.com/macros/s/AKfycbwRbfdoIyp6VESz9HhB5CTI_UYFx5nDY1AvNgRx1cXQhJhIQdorAQJvwqTC4ckXhbOe/exec';
-  var LOCAL_KEY='hisham_discovery_done_v2';
+  var LOCAL_KEY='hisham_discovery_done_v3_reset';
   var overlay=document.getElementById('hishamDiscoveryOverlay');
   var content=document.getElementById('hishamDiscoveryContent');
   var siteOpenTime=new Date().toISOString();
@@ -1781,51 +1781,41 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
     content.querySelectorAll('.hd-btn').forEach(function(btn){btn.addEventListener('click',function(){selectIdentity(btn.getAttribute('data-id'))})});
     open();
   }
-  function showResult(rank,known){
-    if(known){close();return;}
+  function jsonp(url,done){
+    var cb='hishamJsonp_'+Date.now()+'_'+Math.floor(Math.random()*100000);
+    window[cb]=function(data){try{done(data)}finally{try{delete window[cb]}catch(e){};if(script&&script.parentNode)script.parentNode.removeChild(script)}};
+    var script=document.createElement('script');
+    script.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+encodeURIComponent(cb)+'&_='+Date.now();
+    script.onerror=function(){try{delete window[cb]}catch(e){};if(script.parentNode)script.parentNode.removeChild(script);done(null)};
+    document.body.appendChild(script);
+  }
+  function rememberLocal(item){try{localStorage.setItem(LOCAL_KEY,JSON.stringify({identityId:item.id,name:item.name,time:siteOpenTime}))}catch(e){}}
+  function showResult(rank){
     var medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
-    if(rank){content.innerHTML='<div class="hd-success"><div class="hd-medal">'+medal+'</div><h3>تم التسجيل بنجاح</h3><p>تم تسجيل اسمك ضمن أول ثلاثة مكتشفين.</p><button class="hd-close" type="button" id="hdContinue">متابعة</button></div>';content.querySelector('#hdContinue').onclick=function(){close()};open();return;}
-    close();
+    if(rank){content.innerHTML='<div class="hd-success"><div class="hd-medal">'+medal+'</div><h3>تم التسجيل بنجاح</h3><p>تم تسجيل اسمك ضمن أول ثلاثة مكتشفين.</p><button class="hd-close" type="button" id="hdContinue">متابعة</button></div>';content.querySelector('#hdContinue').onclick=function(){close()};open();}
+    else close();
   }
   function selectIdentity(identityId){
     var item=ids.find(function(x){return x.id===identityId});if(!item)return;
-    var data={name:item.name,identityId:item.id,clientId:clientId(),device:device(),time:siteOpenTime,selectedAt:new Date().toISOString()};
-    /* لا ننتظر الشبكة قبل نقل الزائر إلى المكان الذي اختاره. */
+    var data={name:item.name,identityId:item.id,clientId:clientId(),device:device(),time:siteOpenTime};
+    // نحفظ أن هذا الجهاز اختار اسماً فوراً حتى لا تظهر النافذة له مرة ثانية.
+    rememberLocal(item);
     if(item.target==='profile'){
       close();
-      if(typeof doctors!=='undefined'){
-        var d=doctors.find(function(x){return x.id===item.id});
-        if(d&&typeof openSpotlight==='function')openSpotlight(d);
-      }
-    }else{
-      close();
-      if(typeof goHome==='function')goHome();
-    }
-    fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(data)})
-      .then(function(r){return r.json()})
-      .then(function(res){
-        if(res&&res.ok){
-          if(res.known || res.rank || res.total>=3){try{localStorage.setItem(LOCAL_KEY,JSON.stringify({identityId:item.id,name:item.name,time:siteOpenTime}))}catch(e){}}
-          if(res.rank)showResult(res.rank,false);
-        }
-      }).catch(function(){/* الموقع يستمر طبيعيًا حتى لو تعذر الاتصال بالخادم */});
+      if(typeof doctors!=='undefined'){var d=doctors.find(function(x){return x.id===item.id});if(d&&typeof openSpotlight==='function')openSpotlight(d);}
+    }else{close();if(typeof goHome==='function')goHome();}
+    var q=[];Object.keys(data).forEach(function(k){q.push(encodeURIComponent(k)+'='+encodeURIComponent(data[k]))});
+    jsonp(API+'?action=register&'+q.join('&'),function(res){if(res&&res.ok&&res.rank){showResult(Number(res.rank));}});
   }
   function hasLocalRecord(){try{return !!localStorage.getItem(LOCAL_KEY)}catch(e){return false}}
   function checkContestStatus(){
     if(hasLocalRecord())return;
-    fetch(API+'?action=status&_='+Date.now(),{method:'GET',cache:'no-store'})
-      .then(function(r){return r.json()})
-      .then(function(res){
-        if(res&&res.ok&&Number(res.total||0)<3){setTimeout(showIdentity,180);}
-      }).catch(function(){
-        /* إذا تعذر فحص الخادم، نظهر النافذة مرة واحدة على هذا الجهاز؛ الخادم هو الحكم النهائي على المراكز. */
-        setTimeout(showIdentity,180);
-      });
+    jsonp(API+'?action=status',function(res){
+      if(res&&res.ok){if(Number(res.total||0)<3){setTimeout(showIdentity,120);}}
+      else {setTimeout(showIdentity,120);}
+    });
   }
-  function init(){
-    /* الـQR الرسمي يفتح هذا الموقع نفسه. لا توجد صفحة أو QR منفصل للمسابقة. */
-    checkContestStatus();
-  }
+  function init(){checkContestStatus();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
