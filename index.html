@@ -1758,11 +1758,11 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
 (function(){
   'use strict';
   var API='https://script.google.com/macros/s/AKfycbwRbfdoIyp6VESz9HhB5CTI_UYFx5nDY1AvNgRx1cXQhJhIQdorAQJvwqTC4ckXhbOe/exec';
-  var LOCAL_KEY='hisham_discovery_done_v3_reset';
+  var LOCAL_KEY='hisham_discovery_device_v4';
   var overlay=document.getElementById('hishamDiscoveryOverlay');
   var content=document.getElementById('hishamDiscoveryContent');
-  var siteOpenTime=new Date().toISOString();
   if(!overlay||!content)return;
+  var siteOpenTime=new Date().toISOString();
   var ids=[
     {id:'hisham',name:'د. هشام الشيخي',type:'طبيب',target:'profile'},
     {id:'rafe',name:'د. رافع الشيخي',type:'طبيب',target:'profile'},
@@ -1774,45 +1774,68 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
   ];
   function open(){overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');}
   function close(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');}
-  function clientId(){try{var x=localStorage.getItem('hisham_discovery_client');if(!x){x='c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2);localStorage.setItem('hisham_discovery_client',x)}return x}catch(e){return 'c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)}}
-  function device(){var ua=navigator.userAgent||'';var os=/iPhone|iPad|iPod/i.test(ua)?'iPhone/iPad':/Android/i.test(ua)?'Android':/Macintosh/i.test(ua)?'Mac':/Windows/i.test(ua)?'Windows':/Linux/i.test(ua)?'Linux':'جهاز غير محدد';var browser=/Edg\//i.test(ua)?'Edge':/CriOS\//i.test(ua)?'Chrome على iOS':/Chrome\//i.test(ua)?'Chrome':/FxiOS\//i.test(ua)?'Firefox على iOS':/Firefox\//i.test(ua)?'Firefox':/Safari\//i.test(ua)&&!/Chrome|CriOS/i.test(ua)?'Safari':'متصفح غير محدد';return os+' / '+browser}
+  function clientId(){
+    try{
+      var x=localStorage.getItem('hisham_discovery_client_v4');
+      if(!x){x='c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2);localStorage.setItem('hisham_discovery_client_v4',x)}
+      return x;
+    }catch(e){return 'c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2)}
+  }
+  function device(){
+    var ua=navigator.userAgent||'';
+    var os=/iPhone|iPad|iPod/i.test(ua)?'iPhone/iPad':/Android/i.test(ua)?'Android':/Macintosh/i.test(ua)?'Mac':/Windows/i.test(ua)?'Windows':/Linux/i.test(ua)?'Linux':'جهاز غير محدد';
+    var browser=/Edg\//i.test(ua)?'Edge':/CriOS\//i.test(ua)?'Chrome على iOS':/Chrome\//i.test(ua)?'Chrome':/FxiOS\//i.test(ua)?'Firefox على iOS':/Firefox\//i.test(ua)?'Firefox':/Safari\//i.test(ua)&&!/Chrome|CriOS/i.test(ua)?'Safari':'متصفح غير محدد';
+    return os+' / '+browser;
+  }
   function showIdentity(){
-    content.innerHTML='<h2 id="hdTitle">من أنت؟</h2><p>اختر اسمك للمتابعة.</p><div class="hd-list">'+ids.map(function(x){return '<button class="hd-btn" type="button" data-id="'+x.id+'"><span><span class="hd-name">'+x.name+'</span><br><span class="hd-type">'+x.type+'</span></span><span class="hd-badge">›</span></button>'}).join('')+'</div><p class="hd-note">يتم تسجيل الاسم ووقت فتح الموقع والجهاز/المتصفح لأغراض المسابقة فقط.</p>';
+    content.innerHTML='<h2>من أنت؟</h2><p>اختر اسمك للمتابعة.</p><div class="hd-list">'+ids.map(function(x){return '<button class="hd-btn" type="button" data-id="'+x.id+'"><span><span class="hd-name">'+x.name+'</span><br><span class="hd-type">'+x.type+'</span></span><span class="hd-badge">›</span></button>'}).join('')+'</div><p class="hd-note">يتم تسجيل الاسم ووقت فتح الموقع والجهاز/المتصفح لأغراض المسابقة فقط.</p>';
     content.querySelectorAll('.hd-btn').forEach(function(btn){btn.addEventListener('click',function(){selectIdentity(btn.getAttribute('data-id'))})});
     open();
   }
   function jsonp(url,done){
     var cb='hishamJsonp_'+Date.now()+'_'+Math.floor(Math.random()*100000);
-    window[cb]=function(data){try{done(data)}finally{try{delete window[cb]}catch(e){};if(script&&script.parentNode)script.parentNode.removeChild(script)}};
     var script=document.createElement('script');
+    var finished=false;
+    function finish(data){if(finished)return;finished=true;try{delete window[cb]}catch(e){};if(script.parentNode)script.parentNode.removeChild(script);done(data)}
+    window[cb]=finish;
     script.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+encodeURIComponent(cb)+'&_='+Date.now();
-    script.onerror=function(){try{delete window[cb]}catch(e){};if(script.parentNode)script.parentNode.removeChild(script);done(null)};
+    script.onerror=function(){finish({ok:false,error:'network'});};
     document.body.appendChild(script);
+    setTimeout(function(){finish({ok:false,error:'timeout'});},12000);
   }
-  function rememberLocal(item){try{localStorage.setItem(LOCAL_KEY,JSON.stringify({identityId:item.id,name:item.name,time:siteOpenTime}))}catch(e){}}
-  function showResult(rank){
-    var medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
-    if(rank){content.innerHTML='<div class="hd-success"><div class="hd-medal">'+medal+'</div><h3>تم التسجيل بنجاح</h3><p>تم تسجيل اسمك ضمن أول ثلاثة مكتشفين.</p><button class="hd-close" type="button" id="hdContinue">متابعة</button></div>';content.querySelector('#hdContinue').onclick=function(){close()};open();}
-    else close();
+  function saveLocal(item){try{localStorage.setItem(LOCAL_KEY,JSON.stringify({identityId:item.id,name:item.name,time:new Date().toISOString()}))}catch(e){}}
+  function hasLocalRecord(){try{return !!localStorage.getItem(LOCAL_KEY)}catch(e){return false}}
+  function showMessage(title,text,buttonText,action){
+    content.innerHTML='<div class="hd-success"><div class="hd-medal">✓</div><h3>'+title+'</h3><p>'+text+'</p><button class="hd-close" type="button" id="hdContinue">'+buttonText+'</button></div>';
+    content.querySelector('#hdContinue').onclick=action; open();
   }
   function selectIdentity(identityId){
-    var item=ids.find(function(x){return x.id===identityId});if(!item)return;
+    var item=ids.find(function(x){return x.id===identityId}); if(!item)return;
     var data={name:item.name,identityId:item.id,clientId:clientId(),device:device(),time:siteOpenTime};
-    // نحفظ أن هذا الجهاز اختار اسماً فوراً حتى لا تظهر النافذة له مرة ثانية.
-    rememberLocal(item);
-    if(item.target==='profile'){
-      close();
-      if(typeof doctors!=='undefined'){var d=doctors.find(function(x){return x.id===item.id});if(d&&typeof openSpotlight==='function')openSpotlight(d);}
-    }else{close();if(typeof goHome==='function')goHome();}
+    // لا نحفظ الجهاز هنا. نحفظه فقط بعد أن يؤكد الخادم استلام التسجيل.
+    content.innerHTML='<div class="hd-success"><div class="hd-medal">…</div><h3>جارٍ تسجيل الدخول</h3><p>لحظات من فضلك.</p></div>'; open();
     var q=[];Object.keys(data).forEach(function(k){q.push(encodeURIComponent(k)+'='+encodeURIComponent(data[k]))});
-    jsonp(API+'?action=register&'+q.join('&'),function(res){if(res&&res.ok&&res.rank){showResult(Number(res.rank));}});
+    jsonp(API+'?action=register&'+q.join('&'),function(res){
+      if(res&&res.ok){
+        saveLocal(item);
+        if(item.target==='profile'){
+          close();
+          if(typeof doctors!=='undefined'){var d=doctors.find(function(x){return x.id===item.id});if(d&&typeof openSpotlight==='function')openSpotlight(d);}
+        }else{close();if(typeof goHome==='function')goHome();}
+        if(res.rank){
+          var medal=Number(res.rank)===1?'🥇':Number(res.rank)===2?'🥈':'🥉';
+          showMessage('تم التسجيل بنجاح',medal+' تم تسجيل اسمك ضمن أول ثلاثة مكتشفين.','متابعة',close);
+        }
+      }else{
+        showMessage('تعذر تسجيل المحاولة','لم يتم تأكيد التسجيل من الخادم، لذلك لم نحفظ جهازك. اضغط إعادة المحاولة وسيعاد الإرسال.','إعادة المحاولة',function(){selectIdentity(identityId)});
+      }
+    });
   }
-  function hasLocalRecord(){try{return !!localStorage.getItem(LOCAL_KEY)}catch(e){return false}}
   function checkContestStatus(){
     if(hasLocalRecord())return;
     jsonp(API+'?action=status',function(res){
-      if(res&&res.ok){if(Number(res.total||0)<3){setTimeout(showIdentity,120);}}
-      else {setTimeout(showIdentity,120);}
+      if(res&&res.ok&&Number(res.total||0)>=3)return;
+      setTimeout(showIdentity,120);
     });
   }
   function init(){checkContestStatus();}
