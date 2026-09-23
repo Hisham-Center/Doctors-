@@ -1747,7 +1747,21 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
 #hishamDiscoveryOverlay.open{display:flex}
 .hd-card{width:min(560px,94vw);max-height:min(760px,92vh);overflow:auto;background:#fff;border:1px solid rgba(255,255,255,.8);border-radius:28px;box-shadow:0 28px 90px rgba(0,0,0,.28);padding:24px;direction:rtl;text-align:right}
 .hd-card h2{margin:0 0 8px;font-size:27px;color:#12324a}.hd-card p{margin:0 0 18px;color:#607789;line-height:1.8}.hd-list{display:grid;gap:9px}.hd-btn{appearance:none;border:1px solid #dbe7ef;background:#f8fbfd;border-radius:15px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;color:#16384f;font:inherit;transition:.18s}.hd-btn:hover{transform:translateY(-1px);border-color:#8fc4dc;background:#fff;box-shadow:0 8px 20px rgba(20,80,110,.08)}.hd-name{font-weight:800}.hd-type{font-size:12px;color:#7890a0}.hd-badge{width:34px;height:34px;border-radius:11px;background:#eaf6fb;display:grid;place-items:center;color:#1685b3;font-weight:900}.hd-note{margin-top:14px!important;margin-bottom:0!important;font-size:12px}.hd-success{text-align:center;padding:18px 6px 6px}.hd-medal{font-size:48px;margin-bottom:8px}.hd-success h3{font-size:25px;color:#12324a;margin:0 0 8px}.hd-close{margin-top:16px;width:100%;border:0;border-radius:13px;padding:12px;background:#123f5c;color:#fff;font:inherit;font-weight:800;cursor:pointer}
-@media(max-width:520px){.hd-card{padding:18px;border-radius:22px}.hd-card h2{font-size:23px}.hd-btn{padding:11px 12px}}
+/* احتفال المراكز الثلاثة */
+.hd-celebrate{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,25,45,.38);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);animation:hdFadeIn .35s ease both}
+.hd-celebrate-card{position:relative;width:min(520px,94vw);overflow:hidden;text-align:center;direction:rtl;background:rgba(255,255,255,.97);border:1px solid rgba(255,255,255,.95);border-radius:30px;padding:32px 25px 24px;box-shadow:0 28px 90px rgba(0,0,0,.28);animation:hdCelebrateIn .55s cubic-bezier(.18,.89,.32,1.28) both}
+.hd-celebrate-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(85,173,32,.13),transparent 42%);pointer-events:none}
+.hd-celebrate-medal{position:relative;font-size:74px;line-height:1;margin-bottom:12px;animation:hdMedalPop .9s .15s ease both}
+.hd-celebrate-kicker{position:relative;color:#55a526;font-size:13px;font-weight:900;margin-bottom:6px}
+.hd-celebrate-title{position:relative;margin:0;color:#0a3e7c;font-size:30px;line-height:1.35}
+.hd-celebrate-text{position:relative;margin:10px auto 0!important;max-width:410px;color:#647689;font-size:14px;line-height:1.9}
+.hd-celebrate-btn{position:relative;margin-top:20px;width:100%;border:0;border-radius:14px;padding:13px;background:#0e5aad;color:#fff;font:inherit;font-weight:900;cursor:pointer;box-shadow:0 10px 25px rgba(14,90,173,.18)}
+.hd-confetti{position:fixed;top:-24px;width:9px;height:16px;border-radius:2px;z-index:100002;pointer-events:none;animation:hdConfettiFall var(--dur) cubic-bezier(.15,.75,.3,1) forwards;transform:translate3d(0,0,0) rotate(0deg)}
+@keyframes hdFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes hdCelebrateIn{from{opacity:0;transform:translateY(22px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes hdMedalPop{0%{transform:scale(.3) rotate(-12deg);opacity:0}65%{transform:scale(1.15) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes hdConfettiFall{0%{opacity:0;transform:translate3d(0,-20px,0) rotate(0)}10%{opacity:1}100%{opacity:0;transform:translate3d(var(--dx),110vh,0) rotate(var(--rot))}}
+@media(max-width:520px){.hd-card{padding:18px;border-radius:22px}.hd-card h2{font-size:23px}.hd-btn{padding:11px 12px}.hd-celebrate-card{padding:27px 18px 20px;border-radius:25px}.hd-celebrate-medal{font-size:62px}.hd-celebrate-title{font-size:25px}.hd-celebrate-text{font-size:13px}}
 </style>
 <div id="hishamDiscoveryOverlay" aria-hidden="true">
   <div class="hd-card" role="dialog" aria-modal="true" aria-labelledby="hdTitle">
@@ -1757,7 +1771,7 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
 <script id="hisham-discovery-script">
 (function(){
   'use strict';
-  var API='https://script.google.com/macros/s/AKfycbwRbfdoIyp6VESz9HhB5CTI_UYFx5nDY1AvNgRx1cXQhJhIQdorAQJvwqTC4ckXhbOe/exec';
+  var API='https://script.google.com/macros/s/AKfycbwyE84RuCJkvNyeev9BErmM1TCDL-nrHKuYBzS70zdHybEcF2olQ1HIx8eWKpYOz3oo/exec';
   var LOCAL_KEY='hisham_discovery_device_v4';
   var overlay=document.getElementById('hishamDiscoveryOverlay');
   var content=document.getElementById('hishamDiscoveryContent');
@@ -1809,6 +1823,40 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
     content.innerHTML='<div class="hd-success"><div class="hd-medal">✓</div><h3>'+title+'</h3><p>'+text+'</p><button class="hd-close" type="button" id="hdContinue">'+buttonText+'</button></div>';
     content.querySelector('#hdContinue').onclick=action; open();
   }
+  function launchConfetti(){
+    var colors=['#0e5aad','#55ad20','#f2c94c','#e76f51','#6c63ff','#22a06b'];
+    var count=72;
+    for(var i=0;i<count;i++){
+      var piece=document.createElement('span');
+      piece.className='hd-confetti';
+      piece.style.left=(Math.random()*100)+'vw';
+      piece.style.width=(6+Math.random()*6)+'px';
+      piece.style.height=(10+Math.random()*10)+'px';
+      piece.style.background=colors[i%colors.length];
+      piece.style.setProperty('--dx',((Math.random()-.5)*38)+'vw');
+      piece.style.setProperty('--rot',((Math.random()-.5)*1100)+'deg');
+      piece.style.setProperty('--dur',(2.8+Math.random()*2.1)+'s');
+      piece.style.animationDelay=(Math.random()*.45)+'s';
+      document.body.appendChild(piece);
+      setTimeout(function(el){return function(){if(el&&el.parentNode)el.parentNode.removeChild(el)}}(piece),6000);
+    }
+  }
+  function celebrate(rank,name){
+    var n=Number(rank);
+    var medal=n===1?'🥇':n===2?'🥈':'🥉';
+    var title=n===1?'أحسنت! أنت صاحب المركز الأول 🎉':n===2?'مبروك! أنت صاحب المركز الثاني 🎊':'مبروك! أنت صاحب المركز الثالث 🎉';
+    var sub=n===1?'كنت من أوائل من اكتشفوا موقع مركز هشام!':n===2?'اكتشفت الموقع ووصلت إلى أحد المراكز الثلاثة الأولى!':'أصبحت من الثلاثة الأوائل في اكتشاف الموقع!';
+    var wrap=document.createElement('div');
+    wrap.className='hd-celebrate';
+    wrap.innerHTML='<div class="hd-celebrate-card"><div class="hd-celebrate-medal">'+medal+'</div><div class="hd-celebrate-kicker">'+(name||'مبروك')+'</div><h2 class="hd-celebrate-title">'+title+'</h2><p class="hd-celebrate-text">'+sub+'<br>استمتع بجولتك في موقع مركز هشام لطب وجراحة الأسنان ✨</p><button type="button" class="hd-celebrate-btn">دخول الموقع</button></div>';
+    document.body.appendChild(wrap);
+    launchConfetti();
+    var btn=wrap.querySelector('.hd-celebrate-btn');
+    function finish(){if(wrap.parentNode)wrap.parentNode.removeChild(wrap)}
+    btn.onclick=finish;
+    wrap.addEventListener('click',function(e){if(e.target===wrap)finish()});
+    setTimeout(finish,9000);
+  }
   function selectIdentity(identityId){
     var item=ids.find(function(x){return x.id===identityId}); if(!item)return;
     var data={name:item.name,identityId:item.id,clientId:clientId(),device:device(),time:siteOpenTime};
@@ -1822,9 +1870,8 @@ window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(syncUti
           close();
           if(typeof doctors!=='undefined'){var d=doctors.find(function(x){return x.id===item.id});if(d&&typeof openSpotlight==='function')openSpotlight(d);}
         }else{close();if(typeof goHome==='function')goHome();}
-        if(res.rank){
-          var medal=Number(res.rank)===1?'🥇':Number(res.rank)===2?'🥈':'🥉';
-          showMessage('تم التسجيل بنجاح',medal+' تم تسجيل اسمك ضمن أول ثلاثة مكتشفين.','متابعة',close);
+        if(res.rank && !res.known){
+          celebrate(Number(res.rank),item.name);
         }
       }else{
         showMessage('تعذر تسجيل المحاولة','لم يتم تأكيد التسجيل من الخادم، لذلك لم نحفظ جهازك. اضغط إعادة المحاولة وسيعاد الإرسال.','إعادة المحاولة',function(){selectIdentity(identityId)});
